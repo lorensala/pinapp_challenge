@@ -1,0 +1,21 @@
+name: posts
+description: A Very Good Project created by Very Good CLI.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  dio: ^5.7.0
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  fpdart: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^6.0.0
