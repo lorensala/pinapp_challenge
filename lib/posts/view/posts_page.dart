@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pinapp_challenge/comments/cubit/comments_cubit.dart';
+import 'package:pinapp_challenge/comments/comments.dart';
 import 'package:pinapp_challenge/posts/posts.dart';
 import 'package:posts/posts.dart';
 
@@ -78,7 +78,8 @@ class _PostListState extends State<PostList> {
                   .map(
                     (post) => BlocProvider(
                       create: (context) => CommentsCubit(
-                        repository: RepositoryProvider.of(context),
+                        repository:
+                            RepositoryProvider.of<PostRepository>(context),
                       ),
                       child: Builder(
                         builder: (context) => PostListItem(post),

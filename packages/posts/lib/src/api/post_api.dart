@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:posts/src/posts.dart';
 
+const channelName = 'com.example.verygoodcore.pinapp_challenge/api';
+
 /// {@template post_api}
 /// API de posts.
 /// {@endtemplate}
@@ -24,8 +26,7 @@ class JsonPlaceholderPostApi implements PostApi {
 
   final Dio _dio;
 
-  static const platform =
-      MethodChannel('com.example.verygoodcore.pinapp_challenge/api');
+  static const platform = MethodChannel(channelName);
 
   @override
   Future<List<Post>> getPosts() async {
