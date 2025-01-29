@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:posts/src/posts.dart';
@@ -51,6 +52,14 @@ abstract interface class PostRepository {
   Future<Either<Failure, List<Comment>>> getPostComments(int postId);
   List<Post> showMore();
   bool get hasMore;
+  @visibleForTesting
+  int get limit;
+
+  @visibleForTesting
+  int get page;
+
+  @visibleForTesting
+  List<Post> get posts;
 }
 
 /// {@template post_repository_impl}
@@ -75,6 +84,18 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   bool get hasMore => _hasMore;
+
+  @override
+  @visibleForTesting
+  int get limit => _limit;
+
+  @override
+  @visibleForTesting
+  int get page => _page;
+
+  @override
+  @visibleForTesting
+  List<Post> get posts => _posts;
 
   @override
   Future<Either<Failure, List<Post>>> getPosts() async {

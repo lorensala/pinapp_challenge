@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pinapp_challenge/comments/cubit/comments_cubit.dart';
+import 'package:pinapp_challenge/comments/comments.dart';
 import 'package:posts/posts.dart';
 
 class PostDetailPage extends StatelessWidget {
