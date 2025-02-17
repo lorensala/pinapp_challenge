@@ -1,16 +1,30 @@
-import 'package:dio/dio.dart';
+import 'dart:developer';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinapp_challenge/app/app.dart';
 import 'package:pinapp_challenge/bootstrap.dart';
-import 'package:posts/posts.dart';
+
+class Logger extends ProviderObserver {
+  @override
+  void didUpdateProvider(
+    ProviderBase<Object?> provider,
+    Object? previousValue,
+    Object? newValue,
+    ProviderContainer container,
+  ) {
+    log('''
+{
+  "provider": "${provider.name ?? provider.runtimeType}",
+  "newValue": "$newValue"
+}''');
+  }
+}
 
 void main() {
-  final dio = Dio();
-  final postApi = JsonPlaceholderPostApi(dio);
-  final postRepository = PostRepositoryImpl(postApi);
-
   bootstrap(
-    () => App(
-      postRepository: postRepository,
+    () => ProviderScope(
+      observers: [Logger()],
+      child: const App(),
     ),
   );
 }

@@ -3,11 +3,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:posts/src/posts.dart';
 
 /// Errores que pueden surgir al comunicarse con la API de posts.
-enum Failure {
+enum Failure implements Exception {
   notFound,
   internalServerError,
   tooManyRequests,
@@ -48,8 +47,8 @@ enum Failure {
 /// errores que puedan surgir.
 /// {@endtemplate}
 abstract interface class PostRepository {
-  Future<Either<Failure, List<Post>>> getPosts();
-  Future<Either<Failure, List<Comment>>> getPostComments(int postId);
+  Future<List<Post>> getPosts();
+  Future<List<Comment>> getPostComments(int postId);
   List<Post> showMore();
   bool get hasMore;
   @visibleForTesting
@@ -98,15 +97,15 @@ class PostRepositoryImpl implements PostRepository {
   List<Post> get posts => _posts;
 
   @override
-  Future<Either<Failure, List<Post>>> getPosts() async {
+  Future<List<Post>> getPosts() async {
     try {
       final posts = await _api.getPosts();
       _posts = posts;
-      return right(posts.take(_limit).toList());
+      return posts.take(_limit).toList();
     } on DioException catch (e) {
-      return left(Failure.fromDioException(e));
+      throw Failure.fromDioException(e);
     } catch (_) {
-      return left(Failure.unknown);
+      throw Failure.unknown;
     }
   }
 
@@ -121,16 +120,16 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Future<Either<Failure, List<Comment>>> getPostComments(int postId) async {
+  Future<List<Comment>> getPostComments(int postId) async {
     try {
       final comment = await _api.getPostComments(postId);
-      return right(comment);
+      return comment;
     } on DioException catch (e) {
-      return left(Failure.fromDioException(e));
+      throw Failure.fromDioException(e);
     } on PlatformException catch (_) {
-      return left(Failure.platformException);
+      throw Failure.platformException;
     } catch (_) {
-      return left(Failure.unknown);
+      throw Failure.unknown;
     }
   }
 }

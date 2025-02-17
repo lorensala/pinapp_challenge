@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pinapp_challenge/app/app.dart';
-import 'package:pinapp_challenge/comments/comments.dart';
 import 'package:pinapp_challenge/posts/posts.dart';
+import 'package:pinapp_challenge/providers/providers.dart';
 import 'package:posts/posts.dart';
 
 import '../../mocks/mocks.dart';
@@ -21,7 +21,14 @@ void main() {
   testWidgets('$PostsPage loads posts', (tester) async {
     when(() => postApi.getPosts()).thenAnswer((_) async => posts);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
 
@@ -35,7 +42,14 @@ void main() {
   testWidgets('$PostList loads more posts', (tester) async {
     when(() => postApi.getPosts()).thenAnswer((_) async => posts);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     await tester.pump();
 
@@ -54,30 +68,31 @@ void main() {
   testWidgets('$PostsPage shows error message', (tester) async {
     when(() => postApi.getPosts()).thenThrow(error500);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     await tester.pump();
 
     expect(find.text(Failure.internalServerError.message), findsOneWidget);
   });
 
-  testWidgets('$PostListItem has its own $CommentsCubit', (tester) async {
-    when(() => postApi.getPosts()).thenAnswer((_) async => posts);
-
-    await tester.pumpWidget(App(postRepository: postRepository));
-
-    await tester.pump();
-
-    expect(
-      find.byType(BlocProvider<CommentsCubit>),
-      findsNWidgets(postRepository.limit),
-    );
-  });
-
   testWidgets('$PostListItem navigates to $PostDetailPage', (tester) async {
     when(() => postApi.getPosts()).thenAnswer((_) async => posts);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     await tester.pump();
 

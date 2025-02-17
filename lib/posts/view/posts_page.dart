@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pinapp_challenge/comments/comments.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinapp_challenge/posts/posts.dart';
+import 'package:pinapp_challenge/utils/parse_error.dart';
 import 'package:posts/posts.dart';
 
 class PostsPage extends StatelessWidget {
@@ -15,28 +15,27 @@ class PostsPage extends StatelessWidget {
       ),
       backgroundColor:
           CupertinoColors.systemGroupedBackground.resolveFrom(context),
-      child: BlocBuilder<PostsCubit, PostsState>(
-        builder: (context, state) {
-          return switch (state) {
-            PostsInitial() ||
-            PostsLoading() =>
-              const Center(child: CupertinoActivityIndicator()),
-            PostsSuccess(:final posts, :final hasMore) => SafeArea(
-                child: PostList(
-                  posts: posts,
-                  showMore: hasMore,
-                ),
-              ),
-            PostsFailure(:final failure) =>
-              Center(child: Text(failure.message)),
-          };
-        },
-      ),
+      child: const PostsBody(),
     );
   }
 }
 
-class PostList extends StatefulWidget {
+class PostsBody extends ConsumerWidget {
+  const PostsBody({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(postNotifierProvider);
+
+    return posts.when(
+      data: (posts) => PostList(posts: posts, showMore: true),
+      loading: () => const Center(child: CupertinoActivityIndicator()),
+      error: (error, _) => Center(child: Text(parseError(error))),
+    );
+  }
+}
+
+class PostList extends ConsumerStatefulWidget {
   const PostList({
     required this.posts,
     required this.showMore,
@@ -47,10 +46,10 @@ class PostList extends StatefulWidget {
   final bool showMore;
 
   @override
-  State<PostList> createState() => _PostListState();
+  ConsumerState<PostList> createState() => _PostListState();
 }
 
-class _PostListState extends State<PostList> {
+class _PostListState extends ConsumerState<PostList> {
   late final ScrollController _controller;
 
   @override
@@ -58,7 +57,7 @@ class _PostListState extends State<PostList> {
     _controller = ScrollController();
     _controller.addListener(() {
       if (_controller.position.atEdge) {
-        context.read<PostsCubit>().showMore();
+        ref.read(postNotifierProvider.notifier).showMore();
       }
     });
     super.initState();
@@ -74,19 +73,7 @@ class _PostListState extends State<PostList> {
           children: [
             CupertinoListSection(
               header: const Text('Posts'),
-              children: widget.posts
-                  .map(
-                    (post) => BlocProvider(
-                      create: (context) => CommentsCubit(
-                        repository:
-                            RepositoryProvider.of<PostRepository>(context),
-                      ),
-                      child: Builder(
-                        builder: (context) => PostListItem(post),
-                      ),
-                    ),
-                  )
-                  .toList(),
+              children: widget.posts.map(PostListItem.new).toList(),
             ),
             if (widget.showMore) const CupertinoActivityIndicator(),
           ],
@@ -107,16 +94,7 @@ class PostListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoListTile(
-      onTap: () {
-        final cubit = context.read<CommentsCubit>()..getPostComments(post.id);
-
-        Navigator.of(context).push(
-          PostDetailPage.route(
-            post: post,
-            cubit: cubit,
-          ),
-        );
-      },
+      onTap: () => Navigator.of(context).push(PostDetailPage.route(post: post)),
       title: Text(post.title),
       subtitle: Text(post.body),
       trailing: const CupertinoListTileChevron(),

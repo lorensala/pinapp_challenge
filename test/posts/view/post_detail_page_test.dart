@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pinapp_challenge/app/app.dart';
 import 'package:pinapp_challenge/posts/posts.dart';
+import 'package:pinapp_challenge/providers/providers.dart';
 import 'package:posts/posts.dart';
 
 import '../../mocks/mocks.dart';
@@ -22,7 +24,14 @@ void main() {
     when(() => postApi.getPostComments(postId))
         .thenAnswer((_) async => comments);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     await tester.pump();
 
@@ -42,13 +51,22 @@ void main() {
     when(() => postApi.getPosts()).thenAnswer((_) async => posts);
     when(() => postApi.getPostComments(postId)).thenThrow(error500);
 
-    await tester.pumpWidget(App(postRepository: postRepository));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postRepositoryProvider.overrideWithValue(postRepository),
+        ],
+        child: const App(),
+      ),
+    );
 
     await tester.pump();
 
     await tester.tap(find.byType(PostListItem).first);
 
     await tester.pumpAndSettle();
+
+    print(find.byType(Text));
 
     expect(find.text(Failure.internalServerError.message), findsOneWidget);
   });

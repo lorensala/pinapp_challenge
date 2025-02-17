@@ -1,2 +1,2 @@
-export 'cubit/cubit.dart';
+export 'notifier/notifier.dart';
 export 'view/view.dart';
