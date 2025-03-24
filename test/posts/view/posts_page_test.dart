@@ -39,6 +39,30 @@ void main() {
     expect(find.text('body'), findsNWidgets(postRepository.limit));
   });
 
+  testWidgets(
+    'Golden image test',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            postRepositoryProvider.overrideWithValue(postRepository),
+          ],
+          child: const App(),
+        ),
+      );
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+
+      await tester.pump();
+
+      await expectLater(
+        find.byType(PostsPage),
+        matchesGoldenFile('app.png'),
+      );
+    },
+    tags: ['golden'],
+  );
+
   testWidgets('$PostList loads more posts', (tester) async {
     when(() => postApi.getPosts()).thenAnswer((_) async => posts);
 
